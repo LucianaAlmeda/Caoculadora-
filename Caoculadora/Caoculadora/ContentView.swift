@@ -15,6 +15,8 @@ struct ContentView: View {
     
     
     @State var porteSelected = Porte.pequeno
+    @State var failedInput = false
+    let tituloPreencherCampos = "Preencha os campos para cãocular"
     
     var body: some View {
         NavigationStack {
@@ -45,7 +47,10 @@ struct ContentView: View {
                     
                     if let result {
                         Text("Seu cachorro tem, em idade humana...").font(.body1)
+                            .frame(maxWidth: .infinity)
                         Text("\(result) anos").font(.display)
+                            .frame(maxWidth: .infinity)
+                            .contentTransition(.numericText())
                     } else {
                         Image(ImageResource.clarinha)
                             .resizable()
@@ -68,7 +73,11 @@ struct ContentView: View {
                 .keyboardType(.numberPad) //para nao aparecer letras
                 .padding()
                 .containerRelativeFrame(.vertical)
+                //   .animation(.easeInOut.speed(0.5), value: result)
             }
+            .alert(tituloPreencherCampos, isPresented: $failedInput , actions: {
+                Button ("OK", role: .cancel, action: {})
+            })
             .navigationTitle("Cãoculadora")
             .scrollDismissesKeyboard(.immediately)
             .toolbarBackground(.indigo, for:.navigationBar)
@@ -76,27 +85,33 @@ struct ContentView: View {
             .toolbarColorScheme(.dark, for:.navigationBar)
         }
         .fontDesign(.rounded)
+        
     }
 }
-    //MARK: - functions
-    extension ContentView {
-        func processYears () {
-            print ("Cãocular")
-            
-            guard let years, let months else {
-                print("Campos não preechidos")
-                return }
-            
-            guard months > 0 || years > 0 else {
-                print("pelo menos um campo deve ser maior que zero")
-                return }
-            
-            result = porteSelected.calcularIdade(deAnos: years, 
-                                                 eMeses: months)
+//MARK: - functions
+extension ContentView {
+    func processYears () {
+        print ("Cãocular")
         
-            #Preview {
-                ContentView()
-            }
+        guard let years, let months else {
+            failedInput = true
+            print("Campos não preechidos")
+            return }
+        
+        guard months > 0 || years > 0 else {
+            print("pelo menos um campo deve ser maior que zero")
+            return
         }
+        
+        withAnimation( .easeInOut.speed(0.5)){
+            result = porteSelected.calcularIdade(deAnos: years,
+                                                 eMeses: months)
+        }
+        
     }
+}
+
+#Preview {
+    ContentView()
+}
 
